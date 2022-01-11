@@ -1,0 +1,14 @@
+minikube start --kubernetes-version='1.20.0'
+
+helm repo add pravega https://charts.pravega.io
+helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com/
+helm repo add elastic https://helm.elastic.co
+helm repo update
+
+helm upgrade --install zookeeper-operator pravega/zookeeper-operator -n zookeeper --create-namespace --version 0.2.13
+helm upgrade --install kafka-operator banzaicloud-stable/kafka-operator -n kafka --create-namespace --version 0.20.1 --set-string crd.enabled=true
+helm upgrade --install elastic-operator elastic/eck-operator -n elastic-system --create-namespace --version 1.3.0 --wait
+
+kubectl apply -f resources/elastic-cluster.yaml
+kubectl apply -f resources/zookeper-cluster.yaml
+kubectl apply -n kafka -f https://raw.githubusercontent.com/banzaicloud/koperator/master/config/samples/simplekafkacluster.yaml

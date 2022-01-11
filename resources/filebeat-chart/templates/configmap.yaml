@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat
+data:
+  filebeat.yml: |-
+    filebeat.shutdown_timeout: 300s
+    http.enabled: true
+    logging:
+      level: debug
+
+    filebeat.inputs:
+    - type: kafka
+      hosts: kafka-headless.kafka.svc.cluster.local:29092
+      topics: filebeat
+      group_id: filebeat
+
+    output.elasticsearch:
+      hosts: https://elastic-es-default.elastic-system.svc.cluster.local:9200
+      username: elastic
+      password: {{ .Values.elastic.password }}
+      bulk_max_size: 25
+      compression_level: 9
+      ssl:
+        verification_mode: none

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat
+  labels:
+    app.kubernetes.io/version: 7.16.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: filebeat
+      app.kubernetes.io/instance: filebeat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: filebeat
+        app.kubernetes.io/instance: filebeat
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat-oss:7.16.0
+          imagePullPolicy: IfNotPresent
+          args: [
+              "-c", "/etc/filebeat.yml",
+              "-e"
+          ]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/filebeat.yml
+              readOnly: true
+              subPath: filebeat.yml
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 0640
+            name: filebeat
